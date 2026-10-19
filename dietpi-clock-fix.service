@@ -1,7 +1,0 @@
-[Unit]
-Description=Correct DietPi system clock using HTTPS time
-
-[Service]
-Type=oneshot
-ExecStart=/usr/local/sbin/dietpi-clock-fix
-TimeoutStartSec=45

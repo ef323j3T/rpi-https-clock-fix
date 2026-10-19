@@ -1,0 +1,7 @@
+[Unit]
+Description=Correct system clock using HTTPS time
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/rpi-clock-fix
+TimeoutStartSec=45

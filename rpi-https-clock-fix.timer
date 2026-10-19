@@ -1,11 +1,11 @@
 [Unit]
-Description=Check DietPi clock at boot and daily
+Description=Check system clock at boot and daily
 
 [Timer]
 OnBootSec=2min
 OnUnitActiveSec=1d
 AccuracySec=1min
-Unit=dietpi-clock-fix.service
+Unit=rpi-clock-fix.service
 
 [Install]
 WantedBy=timers.target

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -u
 
-LOG_TAG="dietpi-clock-fix"
+LOG_TAG="rpi-clock-fix"
 MAX_DRIFT=5
 MAX_DIFFERENCE=15
 TMPDIR="$(mktemp -d)"
