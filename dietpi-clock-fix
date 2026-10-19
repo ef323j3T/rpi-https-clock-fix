@@ -1,0 +1,78 @@
+#!/bin/bash
+set -u
+
+LOG_TAG="dietpi-clock-fix"
+MAX_DRIFT=5
+MAX_DIFFERENCE=15
+TMPDIR="$(mktemp -d)"
+trap 'rm -rf "$TMPDIR"' EXIT
+
+log() {
+    echo "[$LOG_TAG] $*"
+}
+
+get_server_time() {
+    local url="$1"
+    local output="$2"
+    local date_header
+
+    date_header="$(curl -fsSI --max-time 10 "$url" 2>/dev/null |
+        awk 'BEGIN { IGNORECASE=1 }
+             /^date:/ {
+                 sub(/\r$/, "")
+                 sub(/^[^:]*:[[:space:]]*/, "")
+                 print
+                 exit
+             }')" || return 1
+
+    [ -n "$date_header" ] || return 1
+
+    date -u -d "$date_header" +%s > "$output" 2>/dev/null
+}
+
+log "Checking HTTPS time sources..."
+
+if ! get_server_time "https://www.google.com/" "$TMPDIR/google"; then
+    log "Google time request failed."
+fi
+
+if ! get_server_time "https://www.cloudflare.com/" "$TMPDIR/cloudflare"; then
+    log "Cloudflare time request failed."
+fi
+
+if [ ! -s "$TMPDIR/google" ] || [ ! -s "$TMPDIR/cloudflare" ]; then
+    log "FAILED: Need valid time from both HTTPS sources; clock unchanged."
+    exit 1
+fi
+
+GOOGLE="$(cat "$TMPDIR/google")"
+CLOUDFLARE="$(cat "$TMPDIR/cloudflare")"
+
+DIFF=$(( GOOGLE - CLOUDFLARE ))
+[ "$DIFF" -lt 0 ] && DIFF=$(( -DIFF ))
+
+if [ "$DIFF" -gt "$MAX_DIFFERENCE" ]; then
+    log "FAILED: Google and Cloudflare differ by ${DIFF}s; clock unchanged."
+    exit 1
+fi
+
+# Use the midpoint of the two timestamps.
+TARGET=$(( (GOOGLE + CLOUDFLARE) / 2 ))
+NOW="$(date +%s)"
+DRIFT=$(( TARGET - NOW ))
+
+log "Google UTC:     $(date -u -d "@$GOOGLE" '+%F %T')"
+log "Cloudflare UTC: $(date -u -d "@$CLOUDFLARE" '+%F %T')"
+log "Clock difference: ${DRIFT}s"
+
+if [ "$DRIFT" -ge "-$MAX_DRIFT" ] && [ "$DRIFT" -le "$MAX_DRIFT" ]; then
+    log "Clock is within tolerance; no change needed."
+    exit 0
+fi
+
+if date -u -s "@$TARGET" >/dev/null; then
+    log "Clock corrected to $(date -u '+%F %T UTC')."
+else
+    log "FAILED to set system clock."
+    exit 1
+fi

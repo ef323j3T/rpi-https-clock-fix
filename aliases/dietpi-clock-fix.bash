@@ -1,0 +1,11 @@
+# DietPi clock correction checks
+alias clock-fix='/usr/local/sbin/dietpi-clock-fix'
+alias clock-status='systemctl status dietpi-clock-fix.service --no-pager'
+alias clock-log='journalctl -u dietpi-clock-fix.service -n 30 --no-pager'
+alias clock-logall='journalctl -u dietpi-clock-fix.service --no-pager'
+alias clock-timer='systemctl list-timers dietpi-clock-fix.timer --no-pager'
+alias clock-enabled='systemctl is-enabled dietpi-clock-fix.timer'
+alias clock-active='systemctl show dietpi-clock-fix.timer -p ActiveState -p Unit'
+alias clock-config='systemctl cat dietpi-clock-fix.timer'
+alias clock-now='date; date -u'
+alias clock-run='systemctl start dietpi-clock-fix.service'
