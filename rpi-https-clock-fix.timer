@@ -5,7 +5,7 @@ Description=Check system clock at boot and daily
 OnBootSec=2min
 OnUnitActiveSec=1d
 AccuracySec=1min
-Unit=rpi-clock-fix.service
+Unit=rpi-https-clock-fix.service
 
 [Install]
 WantedBy=timers.target

@@ -3,5 +3,5 @@ Description=Correct system clock using HTTPS time
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/sbin/rpi-clock-fix
+ExecStart=/usr/local/sbin/rpi-https-clock-fix
 TimeoutStartSec=45
